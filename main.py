@@ -104,7 +104,43 @@ class CSVParser:
     @staticmethod
     def _parse_csv_type2(rows):
         # ["TYPE", "TIME", "SOLD AMOUNt", "BOUGHT AMOUNT", "CURRENCIES"]
-        pass
+        result = []
+
+        type_csv_to_json = {
+            "DEPOSIT": "Buy",
+            "TRADE": "Sell",
+            "WITHDRAWAL": "Withdrawal",
+        }
+
+        received_currency_iso = None
+        received_currency = None
+        sent_currency_iso = None
+        sent_currency = None
+
+        for row in rows:
+            if not pandas.isna(row['SOLD AMOUNt']):
+                sent_currency = row['SOLD AMOUNt']
+                sent_currency_iso = row['CURRENCIES']
+            if not pandas.isna(row['BOUGHT AMOUNT']):
+                received_currency = row['BOUGHT AMOUNT']
+                received_currency_iso = row['CURRENCIES']
+
+            cur_arr = row['CURRENCIES'].split('-')
+            if len(cur_arr) > 2:
+                sent_currency_iso = cur_arr[0]
+                received_currency_iso = cur_arr[2]
+
+            json_row = {
+                'date': row["TIME"],
+                'transaction_type': row['TYPE'],
+                'received_amount': received_currency,
+                'received_currency_iso': received_currency_iso,
+                'sent_amount': sent_currency,
+                'sent_currency_iso': sent_currency_iso,
+            }
+            result.append(json_row)
+
+        return result
 
     def print_results(self):
         """
@@ -117,5 +153,5 @@ class CSVParser:
 
 
 if __name__ == '__main__':
-    parser = CSVParser('exchange_files/exchange_1_transaction_file.csv')
+    parser = CSVParser('exchange_files/exchange_2_transaction_file.csv')
     parser.print_results()
