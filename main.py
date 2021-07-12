@@ -107,9 +107,9 @@ class CSVParser:
         result = []
 
         type_csv_to_json = {
-            "DEPOSIT": "Buy",
-            "TRADE": "Sell",
-            "WITHDRAWAL": "Withdrawal",
+            "Buy": "Withdrawal",
+            "Sell": "Trade",
+            "Deposit": "Deposit",
         }
 
         received_currency_iso = None
@@ -125,14 +125,14 @@ class CSVParser:
                 received_currency = row['BOUGHT AMOUNT']
                 received_currency_iso = row['CURRENCIES']
 
-            cur_arr = row['CURRENCIES'].split('-')
-            if len(cur_arr) > 2:
+            cur_arr = row['CURRENCIES'].split('-to-')
+            if len(cur_arr) > 1:
                 sent_currency_iso = cur_arr[0]
-                received_currency_iso = cur_arr[2]
+                received_currency_iso = cur_arr[1]
 
             json_row = {
                 'date': row["TIME"],
-                'transaction_type': row['TYPE'],
+                'transaction_type': type_csv_to_json[row['TYPE']],
                 'received_amount': received_currency,
                 'received_currency_iso': received_currency_iso,
                 'sent_amount': sent_currency,
